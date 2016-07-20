@@ -40,15 +40,13 @@ import android.util.Log;
 
 class ViewHttpClientFactory {
 	public static HttpClient makeHttpClient() {
-
 		HttpClient client = null;
-
 		// Set up default connection params.
 		HttpParams connParams = new BasicHttpParams();
 		ConnManagerParams.setMaxConnectionsPerRoute(connParams,
 				new ConnPerRoute() {
 					public int getMaxForRoute(HttpRoute route) {
-						return 6;
+						return MAX_CONNECTION_FOR_REOUTER;
 					}
 				});
 
@@ -78,50 +76,33 @@ class ViewHttpClientFactory {
 			String host = Proxy.getDefaultHost();
 			int port = Proxy.getDefaultPort();
 			if (null != host && port != -1) {
-				Log.i("hybrid", "host: " + host + "," + "port: " + port);
 				HttpHost httpHost = null;
 				httpHost = new HttpHost(host, port);
 				httpParams
 						.setParameter(ConnRouteParams.DEFAULT_PROXY, httpHost);
-
 			}
 			HttpConnectionParams.setConnectionTimeout(httpParams,
 					DEFAULT_TIMEOUT_MILLIS);
 			HttpConnectionParams.setSoTimeout(httpParams,
 					DEFAULT_TIMEOUT_MILLIS);
-			// HttpConnectionParams.setSocketBufferSize(httpParams, 8192 * 2);
 			HttpProtocolParams.setVersion(httpParams, HttpVersion.HTTP_1_1);
 			HttpProtocolParams.setContentCharset(httpParams, HTTP.UTF_8);
 
-			// TODO: define the user agent
+			// define the user agent to distinguish differnt client type
 			HttpProtocolParams.setUserAgent(httpParams, HTTP_USER_AGENT);
 
 			client = new DefaultHttpClient(cm, httpParams);
-
-			/*
-			 * {
-			 * 
-			 * @Override protected ConnectionKeepAliveStrategy
-			 * createConnectionKeepAliveStrategy() { return new
-			 * DBKeepAliveStrategy(); } };
-			 */
 		} catch (KeyStoreException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (CertificateException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (KeyManagementException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnrecoverableKeyException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -151,7 +132,6 @@ class ViewHttpClientFactory {
 		private final ClientConnectionManager manager;
 		private final int idleTimeoutSeconds;
 
-		// currently is defined as 300 seconds
 		private final int checkIntervalSeconds;
 		private static IdleConnectionMonitorThread thread = null;
 
@@ -241,9 +221,11 @@ class ViewHttpClientFactory {
 	private static final int KEEP_ALIVE_INTERVAL_SECS = 30;
 
 	/** The default timeout for client connections in milliseconds. */
-	private static final int DEFAULT_TIMEOUT_MILLIS = 30 * 1000; 
+	private static final int DEFAULT_TIMEOUT_MILLIS = 30 * 1000;
+	
+	/** The maximum connection number. */
+	private static final int MAX_CONNECTION_FOR_REOUTER = 6;
 
 	/** the client agent **/
 	private static final String HTTP_USER_AGENT = "View_Android_Client";
 }
-
